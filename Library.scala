@@ -1,10 +1,4 @@
 object MathAlgo {
-  def makePrimes(size: Int) :  = {
-    val primes = List(Int)
-  }
-}
-
-object MathAlgo {
   val MOD = 1000000007
 
   def pow_mod(a: Long, n: Long): Long = {
@@ -26,16 +20,25 @@ object MathAlgo {
   }
 
   def Primes(size: Int): Array[Int] = {
-    var primes: Array[Int]
-    var flag = Array.fill[Boolean](size)(true)
+    var primes = new Array[Int](0)
+    val flag = Array.fill[Boolean](size)(true)
+    val limit = Math.sqrt(size).toInt
 
-    for (i <- 2 until size) {
+    (2 until limit).foreach(i => {
       if (flag(i)) {
-        primes :+ i
-        for (j <- i until size by i) {
-
-        }
+        primes = primes :+ i
+        (i until size by i).foreach(j => {
+          flag(j) = false
+        })
       }
-    }
+    })
+
+    (limit until size).foreach(i => {
+      if (flag(i)) {
+        primes = primes :+ i
+      }
+    })
+
+    primes
   }
 }
