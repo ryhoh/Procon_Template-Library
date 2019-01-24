@@ -139,3 +139,35 @@ class UnionFind(n: Int) {
     find(x) == find(y)
   }
 }
+
+class Graph(n: Int, reversible: Boolean) {
+  private val cost = Array.fill[Int](n, n)(Int.MaxValue)
+  private val connected = Array.fill[Boolean](n, n)(false)
+  private val N = n
+  private val Reversible = reversible
+
+  def connect(from: Int, to: Int, cost: Int): Unit = {
+    connected(from)(to) = true
+    this.cost(from)(to) = cost
+
+    if (Reversible) {
+      connected(to)(from) = true
+      this.cost(to)(from) = cost
+    }
+  }
+
+  def warshall_floyd(): Unit = {
+    (0 until N).foreach(k => {
+      (0 until N).foreach(i => {
+        (0 until N).foreach(j => {
+          if (connected(i)(k) && connected(k)(j))
+            cost(i)(j) = math.min(cost(i)(j), cost(i)(k) + cost(k)(j))
+        })
+      })
+    })
+  }
+
+  def getCost(from: Int)(to: Int): Int = {
+    cost(from)(to)
+  }
+}
