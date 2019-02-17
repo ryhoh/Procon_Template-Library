@@ -2,59 +2,39 @@
 // インクルードできないからコピペすること
 
 // 動作確認用
-#include <bits/stdc++.h>
-using namespace std;
-
-#define rep(i, n) REP(i, 0, n)
-#define REP(i, k, n) for(int i = (int)k; i < (int)n; i++)
-#define rrep(i, n) RREP(i, 0, n)
-#define RREP(i, k, n) for(int i = (int)n-1; i > (int)k-1; i--)
-#define mmax(start, end) *max_element(start, end)
-#define mmin(start, end) *min_element(start, end)
-#define ALL(x) (x).begin(), (x).end()
-
-typedef long long ll;
-typedef string str;
-
-using namespace std;
-template<class T = ll> T in() {
-    T _in;
-    cin >> _in;
-    return _in;
-}
-// --
+#include "template.cc"
 
 /* -- 関数s -- */
 // 素数作成
-vector<int> makePrimes(int size) {
-    vector<int> primes;
-    bool *flag = new bool[size];
+set<int> Primes(int size) {
+    set<int> primes;
+    bool *opened = new bool[size];
 
     rep(i, size) {
-        flag[i] = true;
+        opened[i] = true;
     }
 
     long long limit = sqrt(size);
     REP(i, 2, limit) {
-        if(flag[i]) {
-            primes.push_back(i);
+        if(opened[i]) {
+            primes.insert(i);
             for(long long j=i; j<size; j+=i) {
-                flag[j] = false;
+                opened[j] = false;
             }
         }
     }
     REP(i, limit, size) {
-        if(flag[i]) {
-            primes.push_back(i);
+        if(opened[i]) {
+            primes.insert(i);
         }
     }
 
-    delete[] flag;
+    delete[] opened;
     return primes;
 }
 
 // 素因数分解
-map<int, int> primeDiv(long long N, vector<int> primes) {
+map<int, int> PrimeFactors(long long N, set<int> primes) {
     map<int, int> m;
     m.insert(make_pair(1,1));
     while(true) {
@@ -77,30 +57,34 @@ map<int, int> primeDiv(long long N, vector<int> primes) {
 }
 
 // iが素数かどうかを表す2値配列を作る
-bool *binPrimesOf(bool *start, bool *end) {
-    long long size = end - start;
-
-    *(start) = *(start+1) = false;
-    bool *cur = start+2;
-    while(cur != end)
-        *cur = true;
-
-    int limit = sqrt(size);
-    REP(i, 2, limit) {
-        if(*(start+i)) {
-            for(int j=i; j<size; j+=i) {
-                *(start+j) = false;
-            }
-        }
-    }
-
-    return start;
-}
+//bool *binPrimesOf(bool *start, bool *end) {
+//    long long size = end - start;
+//
+//    *(start) = *(start+1) = false;
+//    bool *cur = start+2;
+//    while(cur != end)
+//        *cur = true;
+//
+//    int limit = sqrt(size);
+//    REP(i, 2, limit) {
+//        if(*(start+i)) {
+//            for(int j=i; j<size; j+=i) {
+//                *(start+j) = false;
+//            }
+//        }
+//    }
+//
+//    return start;
+//}
 
 // 最大公約数（ユークリッドの互除法）
 long long gcd(long long a, long long b) {
-    if (b==0) return a;
-    return gcd(b, a%b);
+    if (b < 0 || (a == 0 && b == 0)) return -1;
+    if (b > a) return gcd(b, a);
+
+    if (b == 0) return 0;
+    if (a % b == 0) return b;
+    return gcd(b, a % b);
 }
 
 // 最小公倍数 ab = gcd(a,b)lcm(a,b) からの式変形で求める
@@ -187,109 +171,109 @@ void shakutori() {
         }
     }
 }
+//
+//// yuproから
+//void erast(int n){
+//  memset(SO,1,sizeof(SO));
+//  SO[1] = false;
+//  SO[0] = false;
+//  REP(i,2,sqrt(n)){
+//    if(SO[i]){
+//      REP(j,2,n){
+//        if(i*j>=1000000) break;
+//        SO[i*j] = false;
+//      }
+//    }
+//  }
+//}
+//
+//// DP
+//int n,W;
+//  cin >> n >> W;
+//  vector<lint> dp(W,0);
+//  int w[210];
+//  int v[210];
+//  rep(i,n) {
+//    cin >> v[i] >> w[i];
+//  }
+//  rep(i,n){
+//    rrep(k,W){
+//      if(k-w[i]<0 || k > W) continue;
+//      dp[k] = max<lint>(dp[k],dp[k-w[i]]+v[i]);
+//    }
+//  }
+//  lint ma=0;
+//  rep(k,200001) ma = max<lint>(ma,dp[k]);
+//  cout << ma << endl;
+//
+//// 桁DP
+//int dp[10001][2][101];
+//int D;
+//int rec(int k = 0,bool tight = true,int sum = 0){
+//
+//  if(k==n.size()) return sum%D == 0;
+//  int x = n[k] - '0';
+//  int r = (tight ? x : 9);
+//  int &res = dp[k][tight][sum];
+//  if(res!=-1) return res;
+//  res = 0;
+//  rep(i,r+1){
+//    res += rec(k+1,tight && i == r, (sum + i)%D);
+//    res %= mod;
+//  }
+//  return res;
+//}
 
-// yuproから
-void erast(int n){
-  memset(SO,1,sizeof(SO));
-  SO[1] = false;
-  SO[0] = false;
-  REP(i,2,sqrt(n)){
-    if(SO[i]){
-      REP(j,2,n){
-        if(i*j>=1000000) break;
-        SO[i*j] = false;
-      }
-    }
-  }
-}
+//// 順列全列挙
+//// 重複あり
+//void permutation_d(int n, int m) {
+//    int t = pow(n,m)
+//    rep(i,m){
+//        a[i] = t%n
+//        t/=m
+//    }
+//}
+//// 重複なし
+//void permutation(int n, int m) {
+//    int t=n!/m!
+//    rep(i,m){
+//        a[i] = t%(m-i)
+//        t/=(m-i)
+//    }
+//    rep(i,m){
+//        rep(j,i){
+//            if(!b[a[i]+j]){
+//                b[a[i]+j]=true
+//                a[i]+=j
+//                break
+//            }
+//        }
+//    }
+//}
 
-// DP
-int n,W;
-  cin >> n >> W;
-  vector<lint> dp(W,0);
-  int w[210];
-  int v[210];
-  rep(i,n) {
-    cin >> v[i] >> w[i];
-  }
-  rep(i,n){
-    rrep(k,W){
-      if(k-w[i]<0 || k > W) continue;
-      dp[k] = max<lint>(dp[k],dp[k-w[i]]+v[i]);
-    }
-  }
-  lint ma=0;
-  rep(k,200001) ma = max<lint>(ma,dp[k]);
-  cout << ma << endl;
-
-// 桁DP
-int dp[10001][2][101];
-int D;
-int rec(int k = 0,bool tight = true,int sum = 0){
-
-  if(k==n.size()) return sum%D == 0;
-  int x = n[k] - '0';
-  int r = (tight ? x : 9);
-  int &res = dp[k][tight][sum];
-  if(res!=-1) return res;
-  res = 0;
-  rep(i,r+1){
-    res += rec(k+1,tight && i == r, (sum + i)%D);
-    res %= mod;
-  }
-  return res;
-}
-
-// 順列全列挙
-// 重複あり
-void permutation_d(int n, int m) {
-    int t = pow(n,m)
-    rep(i,m){
-        a[i] = t%n
-        t/=m
-    }
-}
-// 重複なし
-void permutation(int n, int m) {
-    int t=n!/m!
-    rep(i,m){
-        a[i] = t%(m-i)
-        t/=(m-i)
-    }
-    rep(i,m){
-        rep(j,i){
-            if(!b[a[i]+j]){
-                b[a[i]+j]=true
-                a[i]+=j
-                break
-            }
-        }
-    }
-}
-
-// 組み合わせ数全列挙
-// vector< vector<long long> > C で nCr を C[n][r]に入れる
-vector< vector<long long> > makeC(long long limit) {
-    vector< vector<long long> > C;
-
-    // 0C0 = 1としておく
-    C.push_back(vector<long long>(1, 1));
-
-    for(long long i=1; i<limit; i++) {
-        vector<long long> c;
-        for(long long j=0; j<=i; j++) {
-            if(j == 0)
-                c.push_back(C[i-1][0]);
-            else if(j == i)
-                c.push_back(C[i-1][i-1]);
-            else
-                c.push_back(C[i-1][j-1] + C[i-1][j]);
-        }
-        C.push_back(c);
-    }
-
-    return C;
-}
+//// 組み合わせ数全列挙
+//// vector< vector<long long> > C で nCr を C[n][r]に入れる
+//vector< vector<long long> > makeC(long long limit) {
+//    vector< vector<long long> > C;
+//
+//    // 0C0 = 1としておく
+//    C.push_back(vector<long long>(1, 1));
+//
+//    for(long long i=1; i<limit; i++) {
+//        vector<long long> c;
+//        for(long long j=0; j<=i; j++) {
+//            if(j == 0)
+//                c.push_back(C[i-1][0]);
+//            else if(j == i)
+//                c.push_back(C[i-1][i-1]);
+//            else
+//                c.push_back(C[i-1][j-1] + C[i-1][j]);
+//        }
+//        C.push_back(c);
+//    }
+//
+//    return C;
+//}
 
 // 階乗列挙
 vector<long long> makeFactorial(long long limit) {
@@ -612,20 +596,7 @@ const int dy8[8] = {-1, 0, 1, -1, 1, -1, 0, 1};
 
 // 動作確認用
 int main() {
-    vector< vector<long long> > C = makeC(76);
-
-    rep(i, C.size()) {
-        rep(j, C[i].size())
-            cout << C[i][j] << " ";
-        cout << endl;
-    }
-
-    cout << "nCr = " << C[65][34] << endl;
-
-    // vector<long long> F = makeFactorial(16);
-    // rep(i, F.size())
-    //     cout << F[i] << " ";
-    // cout << endl;
+    cout << "hello" << endl;
 
     return 0;
 }
