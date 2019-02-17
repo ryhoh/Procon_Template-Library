@@ -29,46 +29,46 @@ class MathAlgorithm(object):
 
         return a // cls.gcd(a, b) * b
 
-    # @classmethod
-    # def make_comb(cls, limit):  # nCr テーブル
-    #     C = [[1, 1]]
-    #     for i in range(1, limit):
-    #         c = []
-    #         for j in range(j, i + 1):
-    #             if j == 0:
-    #                 c.append(C[i - 1][0])
-    #             elif j == i:
-    #                 c.append(C[i - 1][i - 1])
-    #             else:
-    #                 c.append(C[i - 1][j - 1] + C[i - 1][j])
-    #         C.append(c)
-    #         cls.C = C
-    #     return cls.C
-
     @classmethod
-    def factorial(cls, limit: int) -> list:
+    def factorial_array(cls, limit: int) -> list:
         if limit < 0:
             raise ValueError
 
         f = [1]
-        for i in range(1, limit):
+        for i in range(1, limit + 1):
             f.append(i * f[i - 1])
         cls.F = f
         return cls.F
 
     @classmethod
-    def primes(cls, size: int) -> list:
+    def factorial(cls, x: int) -> int:
+        if x < 0:
+            raise ValueError
+
+        f = [1, 1]
+        for i in range(1, x + 1):
+            f[i % 2] = i * f[(i-1) % 2]
+
+        return f[x % 2]
+
+    @classmethod
+    def make_primes(cls, size: int) -> list:
+        if size < 0:
+            raise ValueError
+        if size < 2:
+            return []
+
         res = []
-        flag = [True for _ in range(size)]
+        flag = [True for _ in range(size + 1)]
         limit = int(math.sqrt(size))
 
-        for i in range(2, limit):
+        for i in range(2, limit + 1):
             if flag[i]:
                 res.append(i)
-                for j in range(i, size, i):
+                for j in range(i, size + 1, i):
                     flag[j] = False
 
-        for i in range(limit, size):
+        for i in range(max(2, limit), size + 1):
             if flag[i]:
                 res.append(i)
 
@@ -78,6 +78,9 @@ class MathAlgorithm(object):
 
     @classmethod
     def prime_factor(cls, n: int, primes: list) -> dict:
+        if n < 1:
+            raise ValueError
+
         res = {1: 1}
         while True:
             ok = False
@@ -97,11 +100,14 @@ class MathAlgorithm(object):
         return res
 
     @classmethod
-    def pow_mod(cls, a: int, n: int) -> int:
+    def pow_mod_positive(cls, a: int, n: int) -> int:
+        if a < 0 or n < 0:
+            raise ValueError
+
         if n == 0:
             return 1
 
-        half = cls.pow_mod(a, n//2)
+        half = cls.pow_mod_positive(a, n//2)
         if n % 2 == 0:
             return half * half % cls.MOD
         else:
@@ -111,32 +117,40 @@ class MathAlgorithm(object):
 class DisjointSet(object):
     def __init__(self, size: int):
         self.size = size
-        self.pare = [i for i in range(size)]
-        self.rk = [i for i in range(size)]
+        self.parent = [i for i in range(size)]
+        self.rank = [i for i in range(size)]
 
-    def find(self, x: int) -> int:
-        if x == self.pare[x]:
+    def find_parent(self, x: int) -> int:
+        if x < 0:
+            raise ValueError
+
+        if x == self.parent[x]:
             return x
-        self.pare[x] = self.find(self.pare[x])
-        return self.pare[x]
+        self.parent[x] = self.find_parent(self.parent[x])
+        return self.parent[x]
 
     def unite(self, x: int, y: int) -> "DisjointSet":
-        x = self.find(x)
-        y = self.find(y)
+        if x < 0 or y < 0:
+            raise ValueError
+
+        x = self.find_parent(x)
+        y = self.find_parent(y)
         if x == y:
             return self
 
-        if self.rk[x] < self.rk[y]:
-            self.pare[x] = y
+        if self.rank[x] < self.rank[y]:
+            self.parent[x] = y
         else:
-            self.pare[y] = x
+            self.parent[y] = x
 
-        if self.rk[x] == self.rk[y]:
-            self.rk[x] += 1
+        if self.rank[x] == self.rank[y]:
+            self.rank[x] += 1
         return self
 
-    def same(self, x: int, y: int) -> bool:
-        return self.find(x) == self.find(y)
+    def have_same_parents(self, x: int, y: int) -> bool:
+        if x < 0 or y < 0:
+            raise ValueError
+        return self.find_parent(x) == self.find_parent(y)
 
 
 class Graph(object):
@@ -152,6 +166,12 @@ class Graph(object):
         def __repr__(self):
             return self.__str__()
 
+        def __eq__(self, other):
+            return self.to == other.to and self.cost == other.cost
+
+        def __hash__(self):
+            return hash(self.to) * 31 + hash(self.cost)
+
     INF = 10e10
 
     def __init__(self, node_n: int):
@@ -159,10 +179,11 @@ class Graph(object):
         self.edges = [{} for _ in range(self.node_n)]
         self.dist = [self.INF for _ in range(self.node_n)]
 
-    def set_edge(self, from_pos: int, to_pos: int, cost: int, reversible: bool) -> None:
+    def set_edge(self, from_pos: int, to_pos: int, cost: int, reversible: bool) -> "Graph":
         self.edges[from_pos][to_pos] = self.Edge(to_pos, cost)
         if reversible:
             self.edges[to_pos][from_pos] = self.Edge(from_pos, cost)
+        return self
 
     def solve(self) -> object:
         raise NotImplementedError
@@ -237,7 +258,7 @@ class BellmanFord(Graph):
                 if self.dist[from_pos] == self.INF:
                     continue
 
-                for edge in self.edges[from_pos]:
+                for edge in self.edges[from_pos].values():
                     alt = self.dist[from_pos] + edge.cost
                     if alt < self.dist[edge.to]:
                         self.dist[edge.to] = alt
@@ -245,30 +266,37 @@ class BellmanFord(Graph):
         return self.dist
 
 
-class WarshallFloyd(Graph):
-    def solve(self) -> "WarshallFloyd":
-        for via_p in range(self.node_n):
-            for from_p in range(self.node_n):
-                for to_p in range(self.node_n):
-                    if via_p in self.edges[from_p].keys() and to_p in self.edges[via_p].keys():
-                        alt = self.edges[from_p][via_p].cost + self.edges[via_p][to_p].cost
-                        if to_p not in self.edges[from_p]:
-                            self.edges[from_p][to_p].cost = alt
-                        else:
-                            self.edges[from_p][to_p].cost = min(self.edges[from_p][to_p].cost, alt)
-        return self
+# class WarshallFloyd(Graph):
+#     def solve(self) -> "WarshallFloyd":
+#         for via_p in range(self.node_n):
+#             for from_p in range(self.node_n):
+#                 for to_p in range(self.node_n):
+#                     if via_p in self.edges[from_p].keys() and to_p in self.edges[via_p].keys():
+#                         alt = self.edges[from_p][via_p].cost + self.edges[via_p][to_p].cost
+#                         if to_p not in self.edges[from_p]:
+#                             self.edges[from_p][to_p] = self.Edge(to_p, alt)
+#                         else:
+#                             self.edges[from_p][to_p].cost = min(self.edges[from_p][to_p].cost, alt)
+#         return self
 
 
 class EList(list):
-    def accumulation_sum(self) -> None:
-        if self.__len__() > 1:
-            for i in range(self.__len__() - 1):
-                self[i + 1] += self[i]
+    def __init__(self, obj):
+        super(EList, self).__init__(obj)
 
-    def back_accumulation_sum(self) -> None:
-        if self.__len__() > 1:
-            for i in range(self.__len__() - 1, 0, -1):
-                self[i - 1] += self[i]
+    def accumulation_sum(self) -> "EList":
+        res = self.copy()
+        if len(res) > 1:
+            for i in range(len(res) - 1):
+                res[i + 1] += res[i]
+        return res
+
+    def back_accumulation_sum(self) -> "EList":
+        res = self.copy()
+        if len(res) > 1:
+            for i in range(len(res) - 1, 0, -1):
+                res[i - 1] += res[i]
+        return res
 
     def copy(self) -> "EList":
         return EList(list.copy(self))
