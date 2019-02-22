@@ -171,3 +171,28 @@ class Graph(n: Int, reversible: Boolean) {
     cost(from)(to)
   }
 }
+
+class TestMathAlgo {
+  def testGcd = {
+    val testSets = {
+      (0, 10): 0,
+      (10, 0): 0,
+      (1, 1): 1,
+      (1, 2): 1,
+      (2, 1): 1,
+      (12, 4): 4,
+      (4, 12): 4,
+      (9, 12): 3,
+      (12, 9): 3,
+    }
+    testSets.foreach((k, v) => {
+      print(k, v)
+    })
+  }
+}
+
+object Main {
+  def main(args: Array[String]): Unit = {
+    TestMathAlgo().testSets
+  }
+}

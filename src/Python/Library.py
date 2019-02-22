@@ -317,7 +317,7 @@ class DP2D(object):
     def __repr__(self):
         return "DynamicProgramming object:\n" + \
                "item_n: " + str(self.item_n) + ", border: " + str(self.border) + "\n" + \
-               "table:\n" + self.__str__()
+               "table:\n" + self.__str__() + "\n"
 
     def solve(self, expr: callable) -> list:
         raise NotImplementedError
@@ -342,6 +342,12 @@ class DP2DOptimizer(DP2D):
             sbj_coef = [0] + sbj_coef
         self.sbj_coef = sbj_coef
 
+    def __repr__(self):
+        res = super(DP2DOptimizer, self).__repr__()
+        res += "object coef: " + str(self.obj_coef) + "\n" + \
+            "subject coef: " + str(self.sbj_coef) + "\n"
+        return res
+
     def solve(self, expr: callable) -> list:
         for weight_lim in range(1, self.border + 1):
             for item_idx in range(1, self.item_n + 1):
@@ -361,7 +367,7 @@ class DP2DOptimizer(DP2D):
             res = max(res, self.table[weight_lim - self.sbj_coef[item_idx]][item_idx] + self.obj_coef[item_idx])
         return res
 
-    def expr_coin(self, target, coin_idx) -> int:
+    def expr_coin(self, target: int, coin_idx: int) -> int:
         if self.sbj_coef[coin_idx] == 1:
             res = target
         else:
